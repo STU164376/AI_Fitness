@@ -1,0 +1,64 @@
+<div class="chat-wrapper">
+    <div nz-row>
+        <h1 class="page-title">AI Fitness Coach</h1>
+    </div>
+
+    <nz-card class="chat-card">
+        <div class="chat-container" #chatContainer>
+            <div *ngIf="messages.length === 0 && !isLoading" class="welcome-message">
+                <span nz-icon nzType="robot" nzTheme="outline" style="font-size: 48px; color: #1890ff;"></span>
+                <h3>Welcome to AI Fitness Coach!</h3>
+                <p>Ask me anything about fitness, workouts, nutrition, or health.</p>
+            </div>
+
+            <div *ngFor="let msg of messages" class="message-wrapper">
+                <div class="user-message">
+                    <div class="message-bubble user-bubble">
+                        <span nz-icon nzType="user" nzTheme="outline" class="message-icon"></span>
+                        <div class="message-content">{{ msg.userMessage }}</div>
+                    </div>
+                    <div class="message-time">{{ msg.timestamp | date:'short' }}</div>
+                </div>
+
+                <div class="ai-message">
+                    <div class="message-bubble ai-bubble">
+                        <span nz-icon nzType="robot" nzTheme="outline" class="message-icon"></span>
+                        <div class="message-content" [innerHTML]="formatMessage(msg.aiResponse)"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="isLoading" class="loading-wrapper">
+                <div class="message-bubble ai-bubble">
+                    <span nz-icon nzType="robot" nzTheme="outline" class="message-icon"></span>
+                    <nz-spin nzSimple></nz-spin>
+                    <span style="margin-left: 10px;">Thinking...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <nz-input-group [nzSuffix]="suffixIconButton">
+                <input
+                    nz-input
+                    placeholder="Ask about fitness, workouts, nutrition..."
+                    [(ngModel)]="userInput"
+                    (keypress)="onKeyPress($event)"
+                    [disabled]="isLoading"
+                />
+            </nz-input-group>
+            <ng-template #suffixIconButton>
+                <button
+                    nz-button
+                    nzType="primary"
+                    nzSearch
+                    (click)="sendMessage()"
+                    [disabled]="!userInput.trim() || isLoading"
+                    [nzLoading]="isLoading"
+                >
+                    <span nz-icon nzType="send"></span>
+                </button>
+            </ng-template>
+        </div>
+    </nz-card>
+</div>

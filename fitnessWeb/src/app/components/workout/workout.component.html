@@ -1,0 +1,168 @@
+<div>
+    <div nz-row style="align-items: center; justify-content: space-between;">
+        <h1 nz-card-grid [ngStyle]="gridStyle">Workout</h1>
+        <button nz-button nzType="primary" nzSize="large" (click)="openModal()" style="margin-right: 20px;">
+            <span nz-icon nzType="play-circle" nzTheme="outline"></span>
+            Start New Workout
+        </button>
+    </div>
+
+    <div nz-row>
+        <div nz-col nzFlex="2">
+            <nz-card nzType="inner" style="margin-top:16px;" nzTitle="Post New Workout">
+                <form nz-form [formGroup]="workoutForm" (ngSubmit)="submitForm()" class="custom-form">
+                    <nz-form-item>
+                        <nz-form-control nzErrorTip="Please input the calories!">
+                            <input type="text" nz-input formControlName="caloriesBurned"
+                                placeholder="Enter the calories you burned" />
+                        </nz-form-control>
+                    </nz-form-item>
+
+                    <nz-form-item>
+                        <nz-form-control nzErrorTip="Please input the duration!">
+                            <input type="number" nz-input formControlName="duration" 
+                            placeholder="Enter duration" />
+                        </nz-form-control>
+                    </nz-form-item>
+
+                    <nz-form-item>
+                        <nz-form-control nzErrorTip="Please input the date!">
+                            <nz-date-picker style="width: 100%;" formControlName="date"></nz-date-picker>
+                        </nz-form-control>
+                    </nz-form-item>
+
+                    <nz-form-item >
+                        <nz-form-control nzErrorTip="Please input the type!">
+                            <nz-select nzAllowClear nzPlaceHolder="Select the type" formControlName="type">
+                                <nz-option *ngFor="let type of listOfType"
+                                [nzLabel]="type" [nzValue]="type"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+                    </nz-form-item>
+
+                    <button nz-button nzType="primary" nzBlock [disabled]="workoutForm.invalid" class="w-100">
+                        Post Workout
+                    </button>
+                </form>
+            </nz-card>
+        </div>
+        <div nz-col nzFlex="3" style="margin-left: 20px;">
+            <nz-card nzType="inner" style="margin-top:16px;" nzTitle="Past Workouts">
+                <div nz-card-grid style="width: 100%;" *ngFor="let workout of workouts">
+                    <div nz-col nzSpan="30">
+                        Calories Burned: <strong>{{workout.caloriesBurned}}</strong>
+                        -
+                        Duration: <strong>{{workout.duration}}</strong>
+                        -
+                        Date: <strong>{{workout.date | date}}</strong>
+                        -
+                        Type: <strong>{{workout.type}}</strong>
+                    </div>
+                </div>
+            </nz-card>
+        </div>
+    </div>
+</div>
+
+<!-- Workout Timer Modal -->
+<nz-modal
+    [(nzVisible)]="isModalVisible"
+    nzTitle="Workout Timer"
+    [nzFooter]="null"
+    (nzOnCancel)="closeModal()"
+    [nzWidth]="500"
+    [nzClosable]="!isWorkoutStarted || isWorkoutEnded"
+>
+    <ng-container *nzModalContent>
+        <div class="workout-modal-content">
+            <!-- Step 1: Select Workout Type -->
+            <div *ngIf="!isWorkoutStarted" class="select-type-section">
+                <h3>Select Workout Type</h3>
+                <nz-select
+                    [(ngModel)]="selectedWorkoutType"
+                    nzPlaceHolder="Choose workout type"
+                    nzSize="large"
+                    style="width: 100%; margin-bottom: 20px;"
+                >
+                    <nz-option *ngFor="let type of listOfType" [nzLabel]="type" [nzValue]="type"></nz-option>
+                </nz-select>
+
+                <button
+                    nz-button
+                    nzType="primary"
+                    nzSize="large"
+                    nzBlock
+                    (click)="startWorkout()"
+                    [disabled]="!selectedWorkoutType"
+                >
+                    <span nz-icon nzType="play-circle" nzTheme="outline"></span>
+                    Start Workout
+                </button>
+            </div>
+
+            <!-- Step 2: Timer Running -->
+            <div *ngIf="isWorkoutStarted && !isWorkoutEnded" class="timer-section">
+                <div class="workout-type-display">
+                    <span nz-icon nzType="thunderbolt" nzTheme="twotone" style="font-size: 24px;"></span>
+                    <h3>{{ selectedWorkoutType }}</h3>
+                </div>
+
+                <div class="timer-display">
+                    <h1>{{ displayTime }}</h1>
+                </div>
+
+                <button
+                    nz-button
+                    nzType="primary"
+                    nzDanger
+                    nzSize="large"
+                    nzBlock
+                    (click)="endWorkout()"
+                >
+                    <span nz-icon nzType="stop" nzTheme="outline"></span>
+                    End Workout
+                </button>
+            </div>
+
+            <!-- Step 3: Results -->
+            <div *ngIf="isWorkoutEnded" class="results-section">
+                <div *ngIf="isCalculating" class="calculating">
+                    <nz-spin nzSimple></nz-spin>
+                    <p>Calculating calories burned...</p>
+                </div>
+
+                <div *ngIf="!isCalculating" class="results-content">
+                    <div class="result-header">
+                        <span nz-icon nzType="check-circle" nzTheme="twotone" [nzTwotoneColor]="'#52c41a'" style="font-size: 48px;"></span>
+                        <h2>Workout Complete!</h2>
+                    </div>
+
+                    <div class="result-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Workout Type</span>
+                            <span class="stat-value">{{ selectedWorkoutType }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Duration</span>
+                            <span class="stat-value">{{ displayTime }}</span>
+                        </div>
+                        <div class="stat-item highlight">
+                            <span class="stat-label">Estimated Calories Burned</span>
+                            <span class="stat-value calories">{{ estimatedCalories }} kcal</span>
+                        </div>
+                    </div>
+
+                    <div class="result-actions">
+                        <button nz-button nzType="primary" nzSize="large" nzBlock (click)="saveWorkout()">
+                            <span nz-icon nzType="save" nzTheme="outline"></span>
+                            Save Workout
+                        </button>
+                        <button nz-button nzSize="large" nzBlock (click)="closeModal()" style="margin-top: 10px;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</nz-modal>
