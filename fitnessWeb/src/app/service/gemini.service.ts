@@ -6,7 +6,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 })
 export class GeminiService {
 
-  private API_KEY = 'ihfuehfuihfuihefuieh';
+  private API_KEY = 'AIzaSyCSyHqmi1CKsjg16z6y3dvzRoN2iG1USlc';
 
   private SYSTEM_PROMPT = `You are a helpful fitness and health assistant. You ONLY answer questions related to:
 - Exercise and workout routines
